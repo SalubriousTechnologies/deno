@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <title>Deno CRUD OPERATION</title>
+  </head>
+  <body style="background: url(1767.jpg);">
+    <div style="
+    border: 1px solid black;
+    
+    max-width: 100%;
+    padding-bottom: 0px; min-height: 670px;">
+    <div align="center" >
+      <h1><%= data.msg %></h1>
+    </div>  
+    <form id="formData" method="post" style="margin: 10px;">
+      <table align="center" border="1" cellpadding="5">
+        <tr>
+          <td>
+           <input type="text" name="ename" id="ename" placeholder="Enter Name">
+          </td>
+          <td>
+            <input type="text" name="emobile" id="emobile" placeholder="Enter Mobile">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="text" name="eemail" id="eemail" placeholder="Enter Email-ID">
+          </td>
+          <td>
+            <input type="text" name="eaddress" id="eaddress" placeholder="Enter Address">
+          </td>      
+        </tr>
+        <tr>
+          <td colspan="2" align="center">
+            <input type="button" name="save" value="Save Data" onclick="saveData()">
+            <input type="hidden" name="eid" id="eid">
+          </td>          
+        </tr>
+      </table>
+    </form>  
+
+    <table align="center" border="1" cellpadding="5">
+      <thead>
+        <tr>
+          <th>
+            S.N.
+          </th>
+          <th onclick="v()">
+            Name
+          </th>
+          <th>
+            Mobile
+          </th>
+          <th>
+            Email-ID
+          </th>
+          <th>
+            Address
+          </th>
+          <th>
+            Action
+          </th>
+        </tr>    
+        
+      </thead>
+      <tbody id="table">
+        
+      </tbody>
+            
+      </tr>
+    </table>
+    </div>
+    <script type="text/javascript">
+      function saveData(){
+        var eid = $("#eid").val();
+        if(eid == ''){
+          action = 'savedata';
+        }else{
+          action = 'editdata';
+        }
+
+        var formData = {
+          ename: $("#ename").val(),
+          emobile:$("#emobile").val(),
+          eemail:$("#eemail").val(),
+          eaddress:$("#eaddress").val(),
+          eid:$("#eid").val()
+        }
+        
+        $.ajax({
+          type: 'post',
+          data: JSON.stringify(formData),
+          dataType:'json',
+          contentType: 'application/json',
+          url: 'http://localhost:8000/savedata',        
+          success: function (res) {
+            if (res) {
+              alert(res.msg);
+              if(res.status == 'success'){
+                $("#formData"). trigger("reset");
+                getData();
+              }else{
+                
+                return false;
+              }  
+            }
+          }
+        });
+      }
+
+      function getData(){       
+        $.ajax({
+          type: 'get',          
+          dataType:'json',
+          contentType: 'application/json',
+          url: 'http://localhost:8000/getData',        
+          success: function (res) {
+            if (res) {
+              $("#table").html('');
+              var data = res.data;
+              var z=data.length;
+              for(var i=0; i<data.length;i++){
+                $('#table').append('<tr><td>'+z+'</td><td>'+data[i].ename+'</td><td>'+data[i].emobile+'</td><td>'+data[i].eemail+'</td><td>'+data[i].eaddress+'</td><td> <i class="fa fa-pencil-square-o" aria-hidden="true" title="Edit" onclick="setData('+data[i].id+')" style="cursor:pointer;"></i> <i class="fa fa-trash" aria-hidden="true" title="Delete" style="cursor:pointer;" onclick="delData('+data[i].id+')"></i>   </td></tr>');
+                z--; 
+              }  
+            }
+          }
+        });
+      }
+        function setData(id){
+          var formData = {
+            id: id         
+          }       
+          $.ajax({
+            type: 'POST',
+            data: JSON.stringify(formData),          
+            dataType:'json',
+            contentType: 'application/json',
+            url: 'http://localhost:8000/setData',        
+            success: function (res) {
+              if (res) {
+              
+                var data = res.data;
+                data = data[0];
+                $("#ename").val(data.ename);
+                $("#emobile").val(data.emobile);
+                $("#eemail").val(data.eemail);
+                $("#eaddress").val(data.eaddress);
+                $("#eid").val(id);
+                
+              }
+            }
+          });
+      }
+
+      function delData(id){
+          var formData = {
+            id: id         
+          }       
+          $.ajax({
+            type: 'POST',
+            data: JSON.stringify(formData),          
+            dataType:'json',
+            contentType: 'application/json',
+            url: 'http://localhost:8000/delData',        
+            success: function (res) {
+              if (res) {
+              
+                alert(res.msg);
+                getData();
+                
+              }
+            }
+          });
+      }
+
+      getData();
+
+    </script>
+  </body>
+</html>
